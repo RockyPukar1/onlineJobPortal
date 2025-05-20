@@ -4,7 +4,7 @@ session_start();
 
 require_once("db.php");
 
-if(isset($_POST)) {
+if (isset($_POST)) {
 
 	$firstname = mysqli_real_escape_string($conn, $_POST['fname']);
 	$lastname = mysqli_real_escape_string($conn, $_POST['lname']);
@@ -27,53 +27,52 @@ if(isset($_POST)) {
 	$sql = "SELECT email FROM users WHERE email='$email'";
 	$result = $conn->query($sql);
 
-	if($result->num_rows == 0) {
+	if ($result->num_rows == 0) {
 
-	$uploadOk = true;
+		$uploadOk = true;
 
-	$folder_dir = "uploads/resume/";
+		$folder_dir = "uploads/resume/";
 
-	$base = basename($_FILES['resume']['name']); 
+		$base = basename($_FILES['resume']['name']);
 
-	$resumeFileType = pathinfo($base, PATHINFO_EXTENSION); 
+		$resumeFileType = pathinfo($base, PATHINFO_EXTENSION);
 
-	$file = uniqid() . "." . $resumeFileType;   
+		$file = uniqid() . "." . $resumeFileType;
 
-	$filename = $folder_dir .$file;  
+		$filename = $folder_dir . $file;
 
-	if(file_exists($_FILES['resume']['tmp_name'])) { 
+		if (file_exists($_FILES['resume']['tmp_name'])) {
 
-		if($resumeFileType == "pdf")  {
+			if ($resumeFileType == "pdf") {
 
-			if($_FILES['resume']['size'] < 500000) { // File size is less than 5MB
+				if ($_FILES['resume']['size'] < 500000) { // File size is less than 5MB
 
-				move_uploaded_file($_FILES["resume"]["tmp_name"], $filename);
-
+					move_uploaded_file($_FILES["resume"]["tmp_name"], $filename);
+				} else {
+					$_SESSION['uploadError'] = "Wrong Size. Max Size Allowed : 5MB";
+					$uploadOk = false;
+				}
 			} else {
-				$_SESSION['uploadError'] = "Wrong Size. Max Size Allowed : 5MB";
+				$_SESSION['uploadError'] = "Wrong Format. Only PDF Allowed";
 				$uploadOk = false;
 			}
 		} else {
-			$_SESSION['uploadError'] = "Wrong Format. Only PDF Allowed";
-			$uploadOk = false;
-		}
-	} else {
 			$_SESSION['uploadError'] = "Something Went Wrong. File Not Uploaded. Try Again.";
 			$uploadOk = false;
 		}
 
-	if($uploadOk == false) {
-		header("Location: register-candidates.php");
-		exit();
-	}
+		if ($uploadOk == false) {
+			header("Location: register-candidates.php");
+			exit();
+		}
 
 		$hash = md5(uniqid());
 
 
 		$sql = "INSERT INTO users(firstname, lastname, email, password, address, city, state, contactno, qualification, stream, passingyear, dob, age, designation, resume, hash, aboutme, skills) VALUES ('$firstname', '$lastname', '$email', '$password', '$address', '$city', '$state', '$contactno', '$qualification', '$stream', '$passingyear', '$dob', '$age', '$designation', '$file', '$hash', '$aboutme', '$skills')";
 
-		if($conn->query($sql)===TRUE) {
-		
+		if ($conn->query($sql) === TRUE) {
+
 			$_SESSION['registerCompleted'] = true;
 			header("Location: login-candidates.php");
 			exit();
@@ -87,7 +86,6 @@ if(isset($_POST)) {
 	}
 
 	$conn->close();
-
 } else {
 	header("Location: register-candidates.php");
 	exit();
